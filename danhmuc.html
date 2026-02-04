@@ -1,0 +1,163 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+<meta charset="UTF-8">
+<title>Quản lý danh mục dịch vụ</title>
+
+<link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+<script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
+
+<style>
+body { background:#f8f9fa; }
+.card { border-radius:12px }
+.table th { background:#0d6efd; color:white }
+</style>
+</head>
+
+<body>
+<div class="container mt-4">
+<div class="card shadow">
+<div class="card-header d-flex justify-content-between">
+<h5 class="mb-0">📁 Quản lý Danh mục dịch vụ</h5>
+<button class="btn btn-primary" id="btnAdd">➕ Thêm danh mục</button>
+</div>
+
+<div class="card-body">
+<input id="search" class="form-control mb-3" placeholder="🔍 Tìm theo tên danh mục">
+
+<table class="table table-bordered table-hover text-center align-middle">
+<thead>
+<tr>
+<th>ID</th>
+<th>Tên danh mục</th>
+<th>Mô tả</th>
+<th>Trạng thái</th>
+<th>Hành động</th>
+</tr>
+</thead>
+<tbody id="danhMucTable"></tbody>
+</table>
+</div>
+</div>
+</div>
+
+<!-- MODAL -->
+<div class="modal fade" id="modalDanhMuc">
+<div class="modal-dialog">
+<div class="modal-content">
+<div class="modal-header">
+<h5 class="modal-title">Danh mục dịch vụ</h5>
+<button class="btn-close" data-bs-dismiss="modal"></button>
+</div>
+
+<div class="modal-body">
+<input type="hidden" id="idDanhMuc">
+
+<div class="mb-2">
+<label>Tên danh mục</label>
+<input id="tenDanhMuc" class="form-control">
+</div>
+
+<div class="mb-2">
+<label>Mô tả</label>
+<textarea id="moTa" class="form-control"></textarea>
+</div>
+
+<div class="mb-2">
+<label>Trạng thái</label>
+<select id="trangThai" class="form-select">
+<option value="1">Hoạt động</option>
+<option value="0">Ẩn</option>
+</select>
+</div>
+</div>
+
+<div class="modal-footer">
+<button class="btn btn-secondary" data-bs-dismiss="modal">Đóng</button>
+<button class="btn btn-success" id="btnSave">Lưu</button>
+</div>
+</div>
+</div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+
+<script>
+$(function(){
+
+    loadDanhMuc();
+
+    function loadDanhMuc(){
+        $.post("danh_muc_api.php",{action:"fetch"},function(res){
+            let rows="";
+            JSON.parse(res).forEach(dm=>{
+                rows+=`
+                <tr>
+                    <td>${dm.id}</td>
+                    <td>${dm.ten_danh_muc}</td>
+                    <td>${dm.mo_ta ?? ""}</td>
+                    <td>${dm.trang_thai==1?"Hoạt động":"Ẩn"}</td>
+                    <td>
+                        <button class="btn btn-warning btn-sm btnEdit"
+                            data-id='${JSON.stringify(dm)}'>✏️</button>
+                        <button class="btn btn-danger btn-sm btnDelete"
+                            data-id="${dm.id}">🗑</button>
+                    </td>
+                </tr>`;
+            });
+            $("#danhMucTable").html(rows);
+        });
+    }
+
+    $("#btnAdd").click(()=>{
+        $("#idDanhMuc").val("");
+        $("#tenDanhMuc,#moTa").val("");
+        $("#trangThai").val(1);
+        $("#modalDanhMuc").modal("show");
+    });
+
+    $("#btnSave").click(()=>{
+        let id=$("#idDanhMuc").val();
+        let action=id?"update":"insert";
+
+        $.post("danh_muc_api.php",{
+            action:action,
+            id:id,
+            ten_danh_muc:$("#tenDanhMuc").val(),
+            mo_ta:$("#moTa").val(),
+            trang_thai:$("#trangThai").val()
+        },()=>{
+            $("#modalDanhMuc").modal("hide");
+            loadDanhMuc();
+        });
+    });
+
+    $(document).on("click",".btnEdit",function(){
+        let d=$(this).data("id");
+        $("#idDanhMuc").val(d.id);
+        $("#tenDanhMuc").val(d.ten_danh_muc);
+        $("#moTa").val(d.mo_ta);
+        $("#trangThai").val(d.trang_thai);
+        $("#modalDanhMuc").modal("show");
+    });
+
+    $(document).on("click",".btnDelete",function(){
+        if(confirm("Xóa danh mục này?")){
+            $.post("danh_muc_api.php",
+                {action:"delete",id:$(this).data("id")},
+                loadDanhMuc
+            );
+        }
+    });
+
+    $("#search").keyup(function(){
+        let v=$(this).val().toLowerCase();
+        $("#danhMucTable tr").filter(function(){
+            $(this).toggle($(this).text().toLowerCase().indexOf(v)>-1)
+        });
+    });
+
+});
+</script>
+</body>
+</html>
