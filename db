@@ -1,7 +1,0 @@
-<?php
-$conn = new mysqli("localhost", "root", "", "quan_li_khach_san");
-$conn->set_charset("utf8");
-
-if ($conn->connect_error) {
-    die("Lỗi kết nối CSDL: " . $conn->connect_error);
-}

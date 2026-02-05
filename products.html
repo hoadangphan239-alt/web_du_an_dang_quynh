@@ -1,0 +1,179 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Hotel Room Service - Dịch vụ phòng</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        :root { --hotel-blue: #2c3e50; --hotel-gold: #c19b6c; }
+        body { background-color: #f4f7f6; font-family: 'Segoe UI', sans-serif; }
+        .navbar-hotel { background: var(--hotel-blue); color: white; padding: 15px; }
+        .category-pill { cursor: pointer; transition: 0.3s; border: 1px solid var(--hotel-blue); color: var(--hotel-blue); }
+        .category-pill.active { background: var(--hotel-blue); color: white; }
+        .product-card { border: none; border-radius: 12px; overflow: hidden; box-shadow: 0 5px 15px rgba(0,0,0,0.05); }
+        .btn-add { background: var(--hotel-blue); color: white; border: none; }
+        .btn-add:hover { background: #1a252f; color: white; }
+        #cart-sidebar { background: white; border-radius: 15px 0 0 15px; min-height: 90vh; }
+        .price { color: var(--hotel-gold); font-weight: bold; }
+    </style>
+</head>
+<body>
+
+<nav class="navbar-hotel d-flex justify-content-between align-items-center shadow-sm mb-4">
+    <h4 class="m-0"><i class="fas fa-hotel me-2"></i> LUXURY HOTEL SERVICE</h4>
+    <div class="d-flex align-items-center">
+        <span class="me-2">Số phòng:</span>
+        <input type="text" id="roomNumber" class="form-control form-control-sm w-25" placeholder="Ví dụ: 301">
+    </div>
+</nav>
+
+<div class="container-fluid">
+    <div class="row px-3">
+        <div class="col-md-8">
+            <div class="d-flex gap-2 mb-4">
+                <span class="badge rounded-pill category-pill active px-3 py-2" data-cat="all">Tất cả</span>
+                <span class="badge rounded-pill category-pill px-3 py-2" data-cat="drink">Đồ uống</span>
+                <span class="badge rounded-pill category-pill px-3 py-2" data-cat="food">Đồ ăn</span>
+                <span class="badge rounded-pill category-pill px-3 py-2" data-cat="service">Dịch vụ khác</span>
+            </div>
+
+            <div class="row" id="product-list">
+                </div>
+        </div>
+
+        <div class="col-md-4">
+            <div id="cart-sidebar" class="p-4 shadow">
+                <h5 class="fw-bold mb-4 border-bottom pb-2">CHI TIẾT ORDER</h5>
+                <div id="cart-items" style="max-height: 400px; overflow-y: auto;">
+                    <p class="text-center text-muted my-5">Chưa có dịch vụ nào được chọn</p>
+                </div>
+                
+                <div class="mt-4 pt-3 border-top">
+                    <div class="d-flex justify-content-between mb-2">
+                        <span>Phí phục vụ (5%):</span>
+                        <span id="service-fee">0đ</span>
+                    </div>
+                    <div class="d-flex justify-content-between fw-bold fs-4 mb-4">
+                        <span>Tổng cộng:</span>
+                        <span id="cart-total" class="price">0đ</span>
+                    </div>
+                    <button class="btn btn-dark btn-lg w-100 shadow" id="btn-checkout">
+                        XÁC NHẬN ORDER
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+<script>
+$(document).ready(function() {
+    let cart = [];
+
+    // Giả lập load sản phẩm từ api.php
+    function loadProducts() {
+        // Sau này bạn thay dummyData bằng $.getJSON('get_products.php', function(data) { ... })
+        const dummyData = [
+            {id: 1, name: "Vang đỏ Cabernet", price: 450000, cat: "drink", img: "https://images.unsplash.com/photo-1510812431401-41d2bd2722f3?w=400"},
+            {id: 2, name: "Bò bít tết sốt tiêu", price: 320000, cat: "food", img: "https://images.unsplash.com/photo-1546241072-48010ad28c2c?w=400"},
+            {id: 3, name: "Giặt ủi cấp tốc", price: 50000, cat: "service", img: "https://images.unsplash.com/photo-1545173168-9f1947eebb7f?w=400"},
+            {id: 4, name: "Nước khoáng Evian", price: 45000, cat: "drink", img: "https://images.unsplash.com/photo-1560023907-5f339617ea30?w=400"}
+        ];
+
+        let html = '';
+        dummyData.forEach(p => {
+            // Đường dẫn đến trang chi tiết
+            const detailLink = `product_detail.html?id=${p.id}`;
+
+            html += `
+            <div class="col-md-4 mb-4 product-item" data-category="${p.cat}">
+                <div class="card product-card h-100 shadow-sm">
+                    <a href="${detailLink}">
+                        <img src="${p.img}" class="card-img-top" style="height:160px; object-fit:cover;" alt="${p.name}">
+                    </a>
+                    
+                    <div class="card-body">
+                        <a href="${detailLink}" class="text-decoration-none text-dark">
+                            <h6 class="fw-bold mb-1">${p.name}</h6>
+                        </a>
+                        
+                        <a href="${detailLink}" class="text-decoration-none">
+                            <p class="price small mb-3">${p.price.toLocaleString()} VNĐ</p>
+                        </a>
+                        
+                        <button class="btn btn-add btn-sm w-100 add-to-cart" 
+                            data-id="${p.id}" data-name="${p.name}" data-price="${p.price}">
+                            <i class="fas fa-cart-plus me-1"></i> Thêm dịch vụ
+                        </button>
+
+                        <div class="mt-2">
+                            <a href="${detailLink}" class="btn btn-outline-secondary btn-sm w-100">
+                                <i class="fas fa-info-circle me-1"></i> Xem chi tiết
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            </div>`;
+        });
+        $('#product-list').html(html);
+    }
+    // Xử lý thêm vào giỏ
+    $(document).on('click', '.add-to-cart', function() {
+        const item = {
+            id: $(this).data('id'),
+            name: $(this).data('name'),
+            price: $(this).data('price'),
+            qty: 1
+        };
+        const exist = cart.find(i => i.id === item.id);
+        if(exist) exist.qty++; else cart.push(item);
+        renderCart();
+    });
+
+    function renderCart() {
+        if(cart.length === 0) {
+            $('#cart-items').html('<p class="text-center text-muted my-5">Chưa có dịch vụ nào</p>');
+            $('#cart-total').text('0đ');
+            return;
+        }
+        let html = '', total = 0;
+        cart.forEach((item, idx) => {
+            total += item.price * item.qty;
+            html += `
+            <div class="d-flex justify-content-between align-items-center mb-3 p-2 bg-light rounded">
+                <div>
+                    <div class="fw-bold small">${item.name}</div>
+                    <small class="text-muted">${item.qty} x ${item.price.toLocaleString()}</small>
+                </div>
+                <button class="btn btn-sm text-danger remove-item" data-idx="${idx}"><i class="fas fa-trash"></i></button>
+            </div>`;
+        });
+        const fee = total * 0.05;
+        $('#service-fee').text(fee.toLocaleString() + 'đ');
+        $('#cart-total').text((total + fee).toLocaleString() + 'đ');
+        $('#cart-items').html(html);
+    }
+
+    $(document).on('click', '.remove-item', function() {
+        cart.splice($(this).data('idx'), 1);
+        renderCart();
+    });
+
+    $('#btn-checkout').click(function() {
+        const room = $('#roomNumber').val();
+        if(!room) return alert("Vui lòng nhập số phòng!");
+        if(cart.length === 0) return alert("Vòng chọn dịch vụ!");
+        
+        alert(`Đơn hàng phòng ${room} đã được gửi đến bộ phận dịch vụ!`);
+        cart = [];
+        renderCart();
+    });
+
+    loadProducts();
+});
+</script>
+</body>
+</html>
