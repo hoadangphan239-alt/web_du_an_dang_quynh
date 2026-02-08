@@ -1,0 +1,185 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Bình Minh Hotel - Đặt phòng & Thanh toán</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        :root { --hotel-blue: #2c3e50; --hotel-gold: #c19b6c; }
+        body { background-color: #f4f7f6; font-family: 'Segoe UI', sans-serif; }
+        .navbar-hotel { background: var(--hotel-blue); color: white; padding: 15px; }
+        .booking-card { border: none; border-radius: 15px; box-shadow: 0 10px 30px rgba(0,0,0,0.1); }
+        .btn-payment { background: var(--hotel-gold); color: white; border: none; font-weight: bold; }
+        .btn-payment:hover { background: #b08a5b; color: white; }
+        .price-summary { background: #fff9f0; border-radius: 10px; padding: 20px; }
+        .step-icon { width: 40px; height: 40px; background: var(--hotel-blue); color: white; border-radius: 50%; display: flex; align-items: center; justify-content: center; margin-bottom: 10px; }
+    </style>
+</head>
+<body>
+
+<nav class="navbar-hotel d-flex justify-content-between align-items-center shadow-sm mb-4">
+    <h4 class="m-0"><i class="fas fa-hotel me-2"></i> BÌNH MINH HOTEL</h4>
+    <a href="index.html" class="text-white text-decoration-none"><i class="fas fa-arrow-left me-1"></i> Quay lại</a>
+</nav>
+
+<div class="container py-5">
+    <div class="row">
+        <div class="col-lg-8">
+            <div class="card booking-card p-4 mb-4">
+                <h5 class="fw-bold mb-4 text-uppercase"><i class="fas fa-user-edit me-2 text-primary"></i>Thông tin đặt phòng</h5>
+                <form id="bookingForm">
+                    <div class="row g-3">
+                        <div class="col-md-6">
+                            <label class="form-label small fw-bold">Họ và tên</label>
+                            <input type="text" id="custName" class="form-control" placeholder="Nguyễn Văn A" required>
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label small fw-bold">Số điện thoại</label>
+                            <input type="tel" id="custPhone" class="form-control" placeholder="090xxxxxxx" required>
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label small fw-bold">Ngày nhận phòng</label>
+                            <input type="date" id="checkIn" class="form-control" required>
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label small fw-bold">Ngày trả phòng</label>
+                            <input type="date" id="checkOut" class="form-control" required>
+                        </div>
+                        <div class="col-12">
+                            <label class="form-label small fw-bold">Loại phòng</label>
+                            <select id="roomType" class="form-select">
+                                <option value="1" data-price="500000">Standard Cozy - 500.000đ/đêm</option>
+                                <option value="2" data-price="800000">Deluxe Ocean View - 800.000đ/đêm</option>
+                                <option value="3" data-price="1500000">Executive Suite - 1.500.000đ/đêm</option>
+                            </select>
+                        </div>
+                    </div>
+                </form>
+            </div>
+
+            <div class="card booking-card p-4">
+                <h5 class="fw-bold mb-4 text-uppercase"><i class="fas fa-credit-card me-2 text-success"></i>Phương thức thanh toán</h5>
+                <div class="form-check mb-3 p-3 border rounded">
+                    <input class="form-check-input ms-0 me-3" type="radio" name="payment" id="payBank" checked>
+                    <label class="form-check-label d-flex align-items-center" for="payBank">
+                        <i class="fas fa-university me-2 fa-lg text-primary"></i> Chuyển khoản ngân hàng (QR Code)
+                    </label>
+                </div>
+                <div class="form-check p-3 border rounded">
+                    <input class="form-check-input ms-0 me-3" type="radio" name="payment" id="payHotel">
+                    <label class="form-check-label d-flex align-items-center" for="payHotel">
+                        <i class="fas fa-money-bill-wave me-2 fa-lg text-success"></i> Thanh toán tại quầy
+                    </label>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-lg-4">
+            <div class="card booking-card p-4 sticky-top" style="top: 20px;">
+                <h5 class="fw-bold mb-4 border-bottom pb-2">TỔNG KẾT CHI PHÍ</h5>
+                <div id="summary">
+                    <div class="d-flex justify-content-between mb-2">
+                        <span class="text-muted">Đơn giá:</span>
+                        <span id="sumPrice">0đ</span>
+                    </div>
+                    <div class="d-flex justify-content-between mb-2">
+                        <span class="text-muted">Số đêm:</span>
+                        <span id="sumNights">0 đêm</span>
+                    </div>
+                    <hr>
+                    <div class="d-flex justify-content-between fw-bold fs-4 mb-4">
+                        <span>Thành tiền:</span>
+                        <span id="sumTotal" class="text-danger">0đ</span>
+                    </div>
+                    <button class="btn btn-payment btn-lg w-100 shadow" id="btnConfirm">
+                        XÁC NHẬN ĐẶT PHÒNG
+                    </button>
+                    <p class="text-center small text-muted mt-3">Đảm bảo giá tốt nhất tại Bình Minh Hotel</p>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+<script>
+$(document).ready(function() {
+    function calculateTotal() {
+    const pricePerNight = parseInt(
+        $("#roomType option:selected").data("price")
+    );
+
+    const start = new Date($('#checkIn').val());
+    const end   = new Date($('#checkOut').val());
+
+    if (start && end && end > start) {
+        const nights = Math.ceil((end - start) / (1000*60*60*24));
+        const total  = nights * pricePerNight;
+
+        $('#sumPrice').text(pricePerNight.toLocaleString() + 'đ');
+        $('#sumNights').text(nights + ' đêm');
+        $('#sumTotal').text(total.toLocaleString() + 'đ');
+
+        return total;
+    }
+    return 0;
+}
+
+
+    $('input, select').on('change', calculateTotal);
+        // Giả lập gửi dữ liệu lên server PHP/SQL
+        $("#btnConfirm").click(function () {
+
+    const total = calculateTotal();
+
+    if (total === 0) {
+        alert("Vui lòng chọn ngày nhận và trả phòng hợp lệ!");
+        return;
+    }
+
+    $.ajax({
+        url: "datphong_api.php?action=add",
+        type: "POST",
+        dataType: "json",
+        data: {
+            KhachHangID: 1, // TODO: lấy từ session khi có login
+            PhongID: $("#roomType").val(),
+            NgayNhan: $("#checkIn").val(),
+            NgayTra: $("#checkOut").val()
+        },
+        success: function (res) {
+            if (res.status === "success") {
+                alert("🎉 Đặt phòng thành công!");
+                window.location.href = "index.html";
+            } else {
+                alert("❌ Lỗi: " + res.message);
+            }
+        },
+        error: function () {
+            alert("❌ Không kết nối được server!");
+        }
+    });
+});
+
+    $(document).ready(function() {
+    // Lấy thông tin từ URL
+    const urlParams = new URLSearchParams(window.location.search);
+    const roomName = urlParams.get('room');
+    const roomPrice = urlParams.get('price');
+
+    if (roomName) {
+        // Tự động chọn đúng option trong select
+        $("#roomType option").filter(function() {
+            return $(this).text().indexOf(roomName) !== -1;
+        }).prop('selected', true);
+        
+        // Cập nhật lại giá hiển thị ngay lập tức
+        calculateTotal(); 
+    }
+});
+});
+</script>
+</body>
+</html>

@@ -22,7 +22,7 @@
 <body>
 
 <nav class="navbar-hotel d-flex justify-content-between align-items-center shadow-sm mb-4">
-    <h4 class="m-0"><i class="fas fa-hotel me-2"></i> LUXURY HOTEL SERVICE</h4>
+    <h4 class="m-0"><i class="fas fa-hotel me-2"></i> Bình Minh</h4>
     <div class="d-flex align-items-center">
         <span class="me-2">Số phòng:</span>
         <input type="text" id="roomNumber" class="form-control form-control-sm w-25" placeholder="Ví dụ: 301">
@@ -59,9 +59,10 @@
                         <span>Tổng cộng:</span>
                         <span id="cart-total" class="price">0đ</span>
                     </div>
-                    <button class="btn btn-dark btn-lg w-100 shadow" id="btn-checkout">
-                        XÁC NHẬN ORDER
-                    </button>
+                    <button class="btn btn-dark w-100 mt-3" id="btnConfirmOrder">
+    XÁC NHẬN ORDER
+</button>
+
                 </div>
             </div>
         </div>
@@ -78,7 +79,7 @@ $(document).ready(function() {
         // Sau này bạn thay dummyData bằng $.getJSON('get_products.php', function(data) { ... })
         const dummyData = [
             {id: 1, name: "Vang đỏ Cabernet", price: 450000, cat: "drink", img: "https://images.unsplash.com/photo-1510812431401-41d2bd2722f3?w=400"},
-            {id: 2, name: "Bò bít tết sốt tiêu", price: 320000, cat: "food", img: "https://images.unsplash.com/photo-1546241072-48010ad28c2c?w=400"},
+        {id: 2, name: "Bò bít tết sốt tiêu", price: 320000, cat: "food", img: "https://images.unsplash.com/photo-1551183053-bf91a1d81141?w=800"},
             {id: 3, name: "Giặt ủi cấp tốc", price: 50000, cat: "service", img: "https://images.unsplash.com/photo-1545173168-9f1947eebb7f?w=400"},
             {id: 4, name: "Nước khoáng Evian", price: 45000, cat: "drink", img: "https://images.unsplash.com/photo-1560023907-5f339617ea30?w=400"}
         ];
@@ -162,16 +163,48 @@ $(document).ready(function() {
         renderCart();
     });
 
-    $('#btn-checkout').click(function() {
-        const room = $('#roomNumber').val();
-        if(!room) return alert("Vui lòng nhập số phòng!");
-        if(cart.length === 0) return alert("Vòng chọn dịch vụ!");
-        
-        alert(`Đơn hàng phòng ${room} đã được gửi đến bộ phận dịch vụ!`);
-        cart = [];
-        renderCart();
+   $('#btnConfirmOrder').click(function () {
+
+    const room = $('#roomNumber').val();
+    if (!room) {
+        alert("Vui lòng nhập số phòng!");
+        return;
+    }
+
+    if (cart.length === 0) {
+        alert("Chưa chọn dịch vụ nào!");
+        return;
+    }
+
+    cart.forEach(item => {
+        fetch("dich_vu_api.php", {
+            method: "POST",
+            headers: {
+                "Content-Type": "application/json"
+            },
+            body: JSON.stringify({
+                DatPhongID: room,
+                DichVuID: item.id,
+                SoLuong: item.qty,
+                NgaySuDung: new Date().toISOString().slice(0, 10)
+            })
+        })
+        .then(res => res.json())
+        .then(data => {
+            console.log(data);
+            if (!data.status) {
+                alert("Lỗi: " + data.message);
+            }
+        })
+        .catch(err => {
+            alert("Lỗi kết nối máy chủ");
+        });
     });
 
+    alert("Đã gửi order dịch vụ!");
+    cart = [];
+    renderCart();
+});
     loadProducts();
 });
 </script>

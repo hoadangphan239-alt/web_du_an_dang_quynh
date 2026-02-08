@@ -1,0 +1,278 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Bình Minh Hotel - Đón ánh bình minh, tận hưởng dịch vụ</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        :root { 
+            --hotel-gold: #c19b6c; 
+            --hotel-dark: #2c3e50; 
+        }
+        body { font-family: 'Segoe UI', sans-serif; background-color: #f8f9fa; }
+
+        /* Hero Section */
+        .hero-section {
+            background: linear-gradient(rgba(0,0,0,0.4), rgba(0,0,0,0.4)), 
+                        url('https://images.unsplash.com/photo-1542314831-068cd1dbfeeb?auto=format&fit=crop&w=1350&q=80');
+            background-size: cover;
+            background-position: center;
+            height: 80vh;
+            display: flex;
+            align-items: center;
+            color: white;
+        }
+
+        /* Thanh đặt phòng (Booking Bar) */
+        .booking-bar {
+            background: white;
+            padding: 30px;
+            border-radius: 10px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+            margin-top: -50px;
+            position: relative;
+            z-index: 10;
+        }
+
+        .btn-search { background: var(--hotel-gold); color: white; border: none; font-weight: bold; }
+        .btn-search:hover { background: #b08a5b; color: white; }
+
+        /* --- PHẦN MỚI: Thanh Dịch Vụ Tiện Ích --- */
+        .utility-bar {
+            background: white;
+            padding: 40px 0;
+            border-bottom: 1px solid #eee;
+        }
+        .utility-item {
+            text-align: center;
+            padding: 15px;
+            transition: 0.3s;
+        }
+        .utility-item i {
+            font-size: 2.5rem;
+            color: var(--hotel-gold);
+            margin-bottom: 15px;
+        }
+        .utility-item h6 {
+            font-weight: bold;
+            color: var(--hotel-dark);
+            margin-bottom: 5px;
+        }
+        .utility-item p {
+            font-size: 0.9rem;
+            color: #6c757d;
+        }
+        /* -------------------------------------- */
+
+        /* Tăng độ rộng container */
+        .container {
+            max-width: 1200px;
+        }
+
+        /* Định dạng thẻ phòng */
+        .service-card {
+            border: none;
+            border-radius: 20px; /* Bo góc mềm mại hơn */
+            overflow: hidden;
+            transition: all 0.3s ease;
+            background: #fff;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.05);
+            height: 100%; /* Đảm bảo các thẻ cao bằng nhau */
+        }
+
+        .service-card:hover {
+            transform: translateY(-10px);
+            box-shadow: 0 15px 35px rgba(0,0,0,0.1);
+        }
+
+        /* Quan trọng: Sửa ảnh không bị hẹp */
+        .service-card img {
+            width: 100%;
+            height: 280px; /* Chiều cao cố định cho ảnh to */
+            object-fit: cover; /* Giữ tỷ lệ ảnh chuẩn */
+        }
+
+        .card-body {
+            padding: 25px !important;
+        }
+
+        .price-tag {
+            color: var(--hotel-gold);
+            font-weight: bold;
+            font-size: 1.25rem;
+            margin: 15px 0;
+            display: block;
+        .
+        }
+        .navbar-brand { font-weight: bold; color: var(--hotel-dark) !important; font-size: 1.5rem; }
+        .navbar-brand span { color: var(--hotel-gold); }
+    </style>
+</head>
+<script>
+function searchRoom() {
+    const room = document.getElementById("roomType").value;
+
+    if (room === "") {
+        alert("Vui lòng chọn loại phòng!");
+        return;
+    }
+
+    if (room === "standard") {
+        window.location.href = "room_standard.html";
+    } 
+    else if (room === "deluxe") {
+        window.location.href = "room_deluxe.html";
+    } 
+    else if (room === "suite") {
+        window.location.href = "room_suite.html";
+    }
+}
+</script>
+
+<body>
+
+<nav class="navbar navbar-expand-lg navbar-light bg-white sticky-top shadow-sm">
+    <div class="container">
+        <a class="navbar-brand" href="#"><i class="fas fa-sun me-2"></i>BÌNH MINH <span>HOTEL</span></a>
+        <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
+            <span class="navbar-toggler-icon"></span>
+        </button>
+        <div class="collapse navbar-collapse" id="navbarNav">
+            <ul class="navbar-nav ms-auto">
+                <li class="nav-item"><a class="nav-link active" href="#">Trang chủ</a></li>
+                <li class="nav-item"><a class="nav-link" href="booking.html">Đặt phòng</a></li>
+                <li class="nav-item"><a class="nav-link" href="products.html">Dịch vụ</a></li>
+               <li class="nav-item">
+    <a class="btn btn-outline-primary me-2" href="logout.php">Đăng xuất</a>
+</li>
+<li class="nav-item">
+    <a class="btn btn-primary" href="login.php">Đăng nhập</a>
+</li>
+                    <a class="nav-link position-relative" href="cart.html">
+                        <i class="fas fa-shopping-cart"></i>
+                        <span id="cart-count" class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger">0</span>
+                    </a>
+                </li>
+            </ul>
+        </div>
+    </div>
+</nav>
+
+<header class="hero-section text-center">
+    <div class="container">
+        <h1 class="display-3 fw-bold">Khởi đầu ngày mới tại Bình Minh</h1>
+        <p class="lead">Nơi vẻ đẹp thiên nhiên hòa quyện cùng sự sang trọng bậc nhất.</p>
+    </div>
+</header>
+
+<div class="container">
+    <div class="booking-bar">
+        <form id="searchForm">
+    <div class="row g-3 align-items-end">
+
+        <div class="col-md-3">
+            <label class="form-label">Loại phòng</label>
+            <select id="roomType" class="form-select">
+                <option value="">-- Chọn phòng --</option>
+                <option value="standard">Standard Cozy</option>
+                <option value="deluxe">Deluxe Ocean View</option>
+                <option value="suite">Executive Suite</option>
+            </select>
+        </div>
+
+        <div class="col-md-3">
+            <button type="button" class="btn btn-search w-100 py-2" onclick="searchRoom()">
+                TÌM PHÒNG NGAY
+            </button>
+        </div>
+
+    </div>
+</form>
+
+
+<section id="utilities" class="utility-bar mt-5">
+    <div class="container">
+        <div class="row">
+            <div class="col-6 col-md-3">
+                <div class="utility-item">
+                    <i class="fas fa-utensils"></i>
+                    <h6>Nhà Hàng 5*</h6>
+                    <p>Ẩm thực Á-Âu tinh tế</p>
+                </div>
+            </div>
+            <div class="col-6 col-md-3">
+                <div class="utility-item">
+                    <i class="fas fa-spa"></i>
+                    <h6>Spa & Wellness</h6>
+                    <p>Thư giãn tâm hồn</p>
+                </div>
+            </div>
+            <div class="col-6 col-md-3">
+                <div class="utility-item">
+                    <i class="fas fa-swimming-pool"></i>
+                    <h6>Hồ Bơi Vô Cực</h6>
+                    <p>Tầm nhìn hướng biển</p>
+                </div>
+            </div>
+            <div class="col-6 col-md-3">
+                <div class="utility-item">
+                    <i class="fas fa-shuttle-van"></i>
+                    <h6>Đưa Đón Sân Bay</h6>
+                    <p>Tiện lợi và nhanh chóng</p>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+<section id="services" class="py-5">
+    <div class="container">
+        <div class="text-center mb-5">
+            <h2 class="fw-bold display-6">Hạng Phòng Nghỉ Dưỡng</h2>
+            <p class="text-muted">Trải nghiệm không gian sang trọng tại Bình Minh Hotel</p>
+        </div>
+
+        <div class="row g-4" id="room-list"> <div class="col-md-4">
+                <div class="card service-card">
+                    <img src="https://images.unsplash.com/photo-1631049307264-da0ec9d70304?auto=format&fit=crop&w=800&q=80" alt="Standard">
+                    <div class="card-body text-center">
+                        <h4 class="fw-bold">Standard Cozy</h4>
+                        <span class="price-tag">500.000 VNĐ</span>
+                       <a href="room_standard.html"class="btn btn-link btn-detail">Xem chi tiết</a>
+                    </div>
+                </div>
+            </div>
+
+            <div class="col-md-4">
+                <div class="card service-card">
+                    <img src="https://images.unsplash.com/photo-1566665797739-1674de7a421a?auto=format&fit=crop&w=800&q=80" alt="Deluxe">
+                    <div class="card-body text-center">
+                        <h4 class="fw-bold">Deluxe Ocean View</h4>
+                        <span class="price-tag">800.000 VNĐ</span>
+                       <a href="room_deluxe.html" class="btn btn-link btn-detail">Xem chi tiết</a>
+                    </div>
+                </div>
+            </div>
+
+            <div class="col-md-4">
+                <div class="card service-card">
+                    <img src="https://images.unsplash.com/photo-1582719478250-c89cae4dc85b?auto=format&fit=crop&w=800&q=80" alt="Suite">
+                    <div class="card-body text-center">
+                        <h4 class="fw-bold">Executive Suite</h4>
+                        <span class="price-tag">1.500.000 VNĐ</span>
+                        <a href="room_suite.html" class="btn btn-link btn-detail">Xem chi tiết</a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>   
+<footer class="bg-dark text-white py-4">
+    <div class="container text-center">
+        <p class="mb-0">© 2026 Binh Minh Hotel. All rights reserved.</p>
+    </div>
+</footer>
+</script>
+</body>
+</html>

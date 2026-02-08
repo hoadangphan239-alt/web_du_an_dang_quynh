@@ -1,0 +1,222 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <title>Quản lý danh mục</title>
+
+    <!-- Bootstrap 5 -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+
+    <!-- Icons -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons/font/bootstrap-icons.css" rel="stylesheet">
+
+    <style>
+        body {
+            background: #f4f6f9;
+        }
+        .card {
+            border-radius: 12px;
+        }
+        .badge-status {
+            cursor: pointer;
+        }
+    </style>
+</head>
+<body>
+
+<div class="container py-5">
+    <div class="row">
+        <div class="col-md-12">
+
+            <!-- HEADER -->
+            <div class="d-flex justify-content-between align-items-center mb-4">
+                <h3 class="fw-bold">
+                    <i class="bi bi-folder"></i> Quản lý danh mục
+                </h3>
+                <button class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#categoryModal">
+                    <i class="bi bi-plus-circle"></i> Thêm danh mục
+                </button>
+            </div>
+
+            <!-- TABLE -->
+            <div class="card shadow-sm">
+                <div class="card-body">
+                    <table class="table table-hover align-middle">
+                        <thead class="table-light">
+                            <tr>
+                                <th>#</th>
+                                <th>Tên danh mục</th>
+                                <th>Mô tả</th>
+                                <th>Trạng thái</th>
+                                <th width="150">Hành động</th>
+                            </tr>
+                        </thead>
+                        <tbody id="categoryTable">
+                            <!-- JS render -->
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+        </div>
+    </div>
+</div>
+
+<!-- MODAL -->
+<div class="modal fade" id="categoryModal">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <form id="categoryForm">
+                <div class="modal-header">
+                    <h5 class="modal-title">Danh mục</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+
+                <div class="modal-body">
+                    <input type="hidden" id="cat_id">
+
+                    <div class="mb-3">
+                        <label class="form-label">Tên danh mục</label>
+                        <input type="text" id="ten_danh_muc" class="form-control" required>
+                    </div>
+
+                    <div class="mb-3">
+                        <label class="form-label">Mô tả</label>
+                        <textarea id="mo_ta" class="form-control" rows="3"></textarea>
+                    </div>
+
+                    <div class="form-check">
+                        <input class="form-check-input" type="checkbox" id="trang_thai" checked>
+                        <label class="form-check-label">Hoạt động</label>
+                    </div>
+                </div>
+
+                <div class="modal-footer">
+                    <button class="btn btn-secondary" data-bs-dismiss="modal">Hủy</button>
+                    <button class="btn btn-success">Lưu</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<!-- JS -->
+<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+
+<script>
+let categories = [
+    {id: 1, ten: "Phòng", mo_ta: "Danh mục phòng", trang_thai: 1},
+    {id: 2, ten: "Dịch vụ", mo_ta: "Dịch vụ khách sạn", trang_thai: 1},
+    {id: 3, ten: "Ẩm thực", mo_ta: "Đồ ăn - thức uống", trang_thai: 0}
+];
+function loadCategories(){
+    $.getJSON("danhmuc_api.php?action=list", function(data){
+        let html = "";
+        data.forEach((c, i) => {
+            html += `
+            <tr>
+                <td>${i+1}</td>
+                <td>${c.ten_danh_muc}</td>
+                <td>${c.mo_ta ?? ''}</td>
+                <td>
+                    <span class="badge ${c.trang_thai == 1 ? 'bg-success' : 'bg-secondary'}">
+                        ${c.trang_thai == 1 ? 'Hoạt động' : 'Ẩn'}
+                    </span>
+                </td>
+                <td>
+                    <button class="btn btn-sm btn-warning edit" data-id="${c.id}">
+                        <i class="bi bi-pencil"></i>
+                    </button>
+                    <button class="btn btn-sm btn-danger delete" data-id="${c.id}">
+                        <i class="bi bi-trash"></i>
+                    </button>
+                </td>
+            </tr>`;
+        });
+        $("#categoryTable").html(html);
+    });
+}
+
+loadCategories();
+function renderTable() {
+    let html = "";
+    categories.forEach((c, i) => {
+        html += `
+        <tr>
+            <td>${i + 1}</td>
+            <td>${c.ten}</td>
+            <td>${c.mo_ta}</td>
+            <td>
+                <span class="badge badge-status ${c.trang_thai ? 'bg-success' : 'bg-secondary'}">
+                    ${c.trang_thai ? 'Hoạt động' : 'Ẩn'}
+                </span>
+            </td>
+            <td>
+                <button class="btn btn-sm btn-warning me-1 edit" data-id="${c.id}">
+                    <i class="bi bi-pencil"></i>
+                </button>
+                <button class="btn btn-sm btn-danger delete" data-id="${c.id}">
+                    <i class="bi bi-trash"></i>
+                </button>
+            </td>
+        </tr>`;
+    });
+    $("#categoryTable").html(html);
+}
+
+renderTable();
+
+/* ADD / UPDATE */
+$("#categoryForm").submit(function(e){
+    e.preventDefault();
+
+    let id = $("#cat_id").val();
+    let action = id ? "update" : "add";
+
+    $.post("danhmuc_api.php?action=" + action, {
+        id: id,
+        ten_danh_muc: $("#ten_danh_muc").val(),
+        mo_ta: $("#mo_ta").val(),
+        trang_thai: $("#trang_thai").is(":checked") ? 1 : 0
+    }, function(){
+        loadCategories(); // load lại từ DB
+        $("#categoryForm")[0].reset();
+        $("#cat_id").val("");
+        bootstrap.Modal.getInstance(
+            document.getElementById("categoryModal")
+        ).hide();
+    });
+});
+
+
+/* EDIT */
+$(document).on("click", ".edit", function(){
+    let id = $(this).data("id");
+
+    $.getJSON("danhmuc_api.php?action=get&id=" + id, function(c){
+        $("#cat_id").val(c.id);
+        $("#ten_danh_muc").val(c.ten_danh_muc);
+        $("#mo_ta").val(c.mo_ta);
+        $("#trang_thai").prop("checked", c.trang_thai == 1);
+
+        new bootstrap.Modal("#categoryModal").show();
+    });
+});
+
+
+/* DELETE */
+$(document).on("click", ".delete", function(){
+    if(confirm("Xóa danh mục này?")){
+        $.post("danhmuc_api.php?action=delete", {
+            id: $(this).data("id")
+        }, function(){
+            loadCategories();
+        });
+    }
+});
+
+</script>
+
+</body>
+</html>

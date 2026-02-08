@@ -32,7 +32,7 @@
 
 <nav class="navbar-hotel d-flex justify-content-between align-items-center shadow-sm mb-4">
     <a href="products.html" class="btn btn-outline-light btn-sm ms-3"><i class="fas fa-arrow-left me-2"></i>Quay lại</a>
-    <h4 class="m-0"><i class="fas fa-hotel me-2"></i> LUXURY HOTEL SERVICE</h4>
+    <h4 class="m-0"><i class="fas fa-hotel me-2"></i> Bình Minh</h4>
     <div class="pe-3"></div>
 </nav>
 
@@ -63,19 +63,17 @@
                         <p class="text-secondary mb-4" id="productDescription">Đang tải mô tả...</p>
 
                         <div class="mb-4">
-                            <label class="form-label fw-bold">Số lượng:</label>
-                            <div class="input-group quantity-group">
-                                <button class="btn btn-outline-secondary" type="button" onclick="changeQty(-1)">-</button>
-                                <input type="number" id="quantity" class="form-control" value="1" min="1">
-                                <button class="btn btn-outline-secondary" type="button" onclick="changeQty(1)">+</button>
-                            </div>
-                        </div>
+    <label class="form-label fw-bold"><i class="fas fa-door-open me-2"></i>Số phòng của bạn:</label>
+    <input type="text" id="inputRoomNumber" class="form-control" placeholder="Ví dụ: 101, 202..." required>
+    <small class="text-muted">Hệ thống sẽ ghi nhận dịch vụ vào hóa đơn của phòng này.</small>
+</div>
 
-                        <div class="d-grid">
-                            <button class="btn btn-add-to-cart btn-lg rounded-3" id="addToCartBtn">
-                                <i class="fas fa-shopping-cart me-2"></i>Thêm vào giỏ hàng
-                            </button>
-                        </div>
+<div class="d-grid">
+    <button class="btn btn-add-to-cart btn-lg rounded-3" id="addToCartBtn">
+        <i class="fas fa-shopping-cart me-2"></i>Thêm vào giỏ hàng
+    </button>
+    
+</div>
                     </div>
                 </div>
             </div>
@@ -92,7 +90,7 @@
 
 <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
 <script>
-    
+   
     // Hàm thay đổi số lượng
     function changeQty(amt) {
         let qty = parseInt($('#quantity').val());
@@ -175,29 +173,63 @@
         loadProductDetail(productId);
 
         // Xử lý giỏ hàng
-        $('#addToCartBtn').click(function() {
-            const data = $(this).data('info');
-            const qty = parseInt($('#quantity').val());
+        // Thay thế đoạn xử lý click #addToCartBtn trong file HTML của bạn:
+$('#addToCartBtn').click(function() {
+    const data = $(this).data('info');
+    const qty = parseInt($('#quantity').val());
+    const roomNumber = $('#inputRoomNumber').val().trim(); // Lấy số phòng từ input
 
-            const item = {
-                id: data.id,
-                name: data.ten_dich_vu,
-                price: data.gia,
-                image: data.hinh_anh,
-                qty: qty
-            };
+    // Kiểm tra nếu khách chưa nhập số phòng
+    if (!roomNumber) {
+        alert("Vui lòng nhập số phòng để chúng tôi phục vụ!");
+        $('#inputRoomNumber').focus();
+        return;
+    }
 
-            let cart = JSON.parse(localStorage.getItem('hotel_cart') || '[]');
-            const index = cart.findIndex(i => i.id === item.id);
+    const postData = {
+        action: 'add_to_service',
+        RoomNumber: roomNumber,
+        DichVuID: data.id,
+        SoLuong: qty
+    };
+
+    const btn = $(this);
+    const originalText = btn.html();
+    btn.prop('disabled', true).text('Đang xử lý...');
+
+    $.post('dich_vu_api.php', postData, function(res) {
+        if (res.status === 'success') {
+            // Hiệu ứng thành công
+            btn.removeClass('btn-add-to-cart').addClass('btn-success')
+               .html('<i class="fas fa-check"></i> Đã đặt thành công');
             
-            if (index > -1) {
-                cart[index].qty += qty;
-            } else {
-                cart.push(item);
-            }
-
-            localStorage.setItem('hotel_cart', JSON.stringify(cart));
+            alert(`Yêu cầu của phòng ${roomNumber} đã được gửi!`);
             
+            setTimeout(() => {
+                btn.prop('disabled', false).removeClass('btn-success')
+                   .addClass('btn-add-to-cart').html(originalText);
+            }, 3000);
+        } else {
+            alert('Lỗi: ' + res.message);
+            btn.prop('disabled', false).html(originalText);
+        }
+    }, 'json').fail(function() {
+        alert('Lỗi kết nối máy chủ!');
+        btn.prop('disabled', false).html(originalText);
+    });
+});
+
+// Hàm phụ để lưu vào local (giữ nguyên logic cũ của bạn)
+function updateLocalStorage(data, qty) {
+    let cart = JSON.parse(localStorage.getItem('hotel_cart') || '[]');
+    const index = cart.findIndex(i => i.id === data.id);
+    if (index > -1) {
+        cart[index].qty += qty;
+    } else {
+        cart.push({ id: data.id, name: data.ten_dich_vu, price: data.gia, qty: qty });
+    }
+    localStorage.setItem('hotel_cart', JSON.stringify(cart));
+}
             // Hiệu ứng thông báo đẹp hơn alert
             const btn = $(this);
             const originalText = btn.html();
@@ -206,7 +238,23 @@
                 btn.prop('disabled', false).removeClass('bg-success').html(originalText);
             }, 2000);
         });
-    });
+ fetch("api/dich_vu_api.php", {
+    method: "POST",
+    headers: {
+        "Content-Type": "application/json"
+    },
+    body: JSON.stringify({
+        DatPhongID: datPhongID,   // ❗ KHÔNG phải số phòng
+        DichVuID: 1,              // id dịch vụ
+        SoLuong: 1,
+        NgaySuDung: new Date().toISOString().slice(0, 10)
+    })
+})
+.then(res => res.json())
+.then(data => {
+    alert(data.message);
+});
+
 </script>
 
 </body>
